@@ -1,0 +1,5 @@
+{
+  "name": "AI Storybook Generator",
+  "description": "An AI-powered platform that generates complete illustrated storybooks from a simple text prompt, including story text, scene descriptions, and high-quality illustrations.",
+  "requestFramePermissions": []
+}
