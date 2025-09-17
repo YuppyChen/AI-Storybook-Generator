@@ -27,7 +27,7 @@ export const translations = {
     loadingCrafting: "Crafting a wonderful story...",
     loadingPainting: (current: number, total: number) => `Painting picture ${current} of ${total}...`,
     loadingReady: "Your storybook is ready!",
-    errorTitle: "An error occurred:",
+    errorTitle: "An Error Occurred",
     footer: "Powered by Google Gemini. Created with imagination.",
     apiKey: "API Key",
     apiKeyPlaceholder: "Enter your Google Gemini API Key",
@@ -35,6 +35,17 @@ export const translations = {
     apiKeyWarningTitle: "API Key Required",
     apiKeyWarningText: "Please use the key icon in the header to enter your Google Gemini API key. This is required to generate stories.",
     apiKeyMissingError: "API Key not set. Please add your key to continue.",
+    errors: {
+      apiKeyInvalid: "The provided API Key is invalid or has expired. Please check your key and try again.",
+      rateLimitExceeded: "You have exceeded your request limit. Please wait a moment and try again.",
+      promptBlocked: "The request was blocked due to safety concerns with the prompt. Please modify your story idea and try again.",
+      serverError: "The AI model is currently experiencing issues. Please try again in a few minutes.",
+      inspirationFailed: "Failed to generate a story idea. The model might be busy, please try again.",
+      characterFailed: "Failed to design the character. The model might be busy, please try again.",
+      storyFailed: "Failed to generate the story structure. Please try again or adjust your prompt.",
+      imageFailed: "Failed to generate an image. This could be a temporary issue or a problem with the prompt. Please try again.",
+      unknown: "An unknown error occurred. Please check the console for details and try again."
+    },
     examplePrompts: [
         "A brave little squirrel who is afraid of heights.",
         "A friendly robot who discovers a magical garden.",
@@ -70,7 +81,7 @@ export const translations = {
     loadingCrafting: "正在构思一个精彩的故事...",
     loadingPainting: (current: number, total: number) => `正在绘制第 ${current} 幅插图（共 ${total} 幅）...`,
     loadingReady: "您的故事绘本已准备就绪！",
-    errorTitle: "发生错误：",
+    errorTitle: "发生错误",
     footer: "由 Google Gemini 驱动。用想象力创作。",
     apiKey: "API 密钥",
     apiKeyPlaceholder: "输入您的 Google Gemini API 密钥",
@@ -78,6 +89,17 @@ export const translations = {
     apiKeyWarningTitle: "需要 API 密钥",
     apiKeyWarningText: "请使用标题栏中的钥匙图标输入您的 Google Gemini API 密钥。这是生成故事所必需的。",
     apiKeyMissingError: "未设置 API 密钥。请添加您的密钥以继续。",
+    errors: {
+      apiKeyInvalid: "提供的 API 密钥无效或已过期。请检查您的密钥后重试。",
+      rateLimitExceeded: "您已超出请求限制。请稍等片刻后重试。",
+      promptBlocked: "由于您的提示可能涉及安全问题，请求已被阻止。请修改您的故事想法后重试。",
+      serverError: "AI 模型当前遇到问题。请在几分钟后重试。",
+      inspirationFailed: "生成故事灵感失败。模型可能正忙，请重试。",
+      characterFailed: "设计角色失败。模型可能正忙，请重试。",
+      storyFailed: "生成故事结构失败。请重试或调整您的提示。",
+      imageFailed: "生成图片失败。这可能是暂时性问题或提示内容问题。请重试。",
+      unknown: "发生未知错误。请检查控制台以获取详细信息并重试。"
+    },
     examplePrompts: [
         "一只害怕高处却很勇敢的小松鼠。",
         "一个发现魔法花园的友好机器人。",

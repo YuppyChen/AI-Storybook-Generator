@@ -2,7 +2,7 @@ import React, { useState } from 'react';
 import { MagicWandIcon, LightbulbIcon } from './icons';
 import { translations } from '../i18n';
 import type { Language, IllustrationStyle } from '../types';
-import { generateRandomInspiration } from '../services/geminiService';
+import { generateRandomInspiration, ApiError } from '../services/geminiService';
 
 
 interface PromptFormProps {
@@ -40,7 +40,11 @@ export const PromptForm: React.FC<PromptFormProps> = ({ onGenerate, isLoading, l
         setPrompt(inspiration);
     } catch (error) {
         console.error("Failed to generate inspiration:", error);
-        alert(error instanceof Error ? error.message : "Could not generate inspiration.");
+        let alertMessage = t.errors.inspirationFailed;
+        if (error instanceof ApiError) {
+          alertMessage = t.errors[error.userFriendlyMessageKey];
+        }
+        alert(alertMessage);
     } finally {
         setIsGeneratingInspiration(false);
     }

@@ -1,5 +1,41 @@
 import { GoogleGenAI, Type, Modality } from "@google/genai";
 import type { Story, StoryPage, Language, IllustrationStyle } from '../types';
+import { translations } from '../i18n';
+
+// Define a custom error class to hold a user-friendly message key
+export class ApiError extends Error {
+    public readonly userFriendlyMessageKey: keyof typeof translations.en.errors;
+
+    constructor(message: string, userFriendlyMessageKey: keyof typeof translations.en.errors) {
+        super(message);
+        this.name = 'ApiError';
+        this.userFriendlyMessageKey = userFriendlyMessageKey;
+    }
+}
+
+// A helper to process raw errors into specific ApiErrors
+const handleApiError = (error: unknown, contextKey: keyof typeof translations.en.errors): ApiError => {
+    console.error(`Error during API call:`, error);
+    
+    const errorMessage = error instanceof Error ? error.message : String(error);
+
+    if (errorMessage.includes('API key not valid') || errorMessage.includes('[400]')) {
+        return new ApiError(errorMessage, 'apiKeyInvalid');
+    }
+    if (errorMessage.includes('[429]')) {
+        return new ApiError(errorMessage, 'rateLimitExceeded');
+    }
+    if (errorMessage.includes('prompt was blocked')) {
+        return new ApiError(errorMessage, 'promptBlocked');
+    }
+    if (errorMessage.includes('[500]') || errorMessage.includes('[503]')) {
+        return new ApiError(errorMessage, 'serverError');
+    }
+    
+    // Fallback to the context-specific error
+    return new ApiError(errorMessage, contextKey);
+};
+
 
 const storySchema = {
   type: Type.OBJECT,
@@ -45,10 +81,9 @@ export const generateRandomInspiration = async (apiKey: string, language: Langua
                 temperature: 1.2,
             },
         });
-        return response.text.trim().replace(/"/g, ''); // Remove quotes from response
+        return response.text.trim().replace(/"/g, '');
     } catch (error) {
-        console.error("Error generating inspiration:", error);
-        throw new Error("Failed to generate a story idea. The model might be busy, please try again.");
+        throw handleApiError(error, 'inspirationFailed');
     }
 };
 
@@ -66,8 +101,7 @@ const generateCharacterProfile = async (apiKey: string, prompt: string, language
         });
         return response.text.trim();
     } catch (error) {
-        console.error("Error generating character profile:", error);
-        throw new Error("Failed to design the character. The model might be busy, please try again.");
+        throw handleApiError(error, 'characterFailed');
     }
 };
 
@@ -99,8 +133,7 @@ const generateStoryContent = async (apiKey: string, prompt: string, language: La
         return parsedStory as Story;
 
     } catch (error) {
-        console.error("Error generating story content:", error);
-        throw new Error("Failed to generate the story structure. The model might be busy, please try again.");
+        throw handleApiError(error, 'storyFailed');
     }
 };
 
@@ -143,11 +176,7 @@ Negative prompt: Do not include any text, words, letters, signatures, or waterma
             throw new Error("No image was generated." + (textResponse ? ` Model response: ${textResponse}` : ''));
         }
     } catch (error) {
-        console.error(`Error generating image for page ${page.pageNumber}:`, error);
-        if (error instanceof Error && error.message.includes("No image was generated")) {
-            throw error;
-        }
-        throw new Error(`Failed to generate image for page ${page.pageNumber}. The model might be busy or the prompt could be unsuitable.`);
+        throw handleApiError(error, 'imageFailed');
     }
 };
 

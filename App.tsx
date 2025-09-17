@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { PromptForm } from './components/PromptForm';
 import { StorybookViewer } from './components/StorybookViewer';
 import { Loader } from './components/Loader';
-import { generateStoryAndImages } from './services/geminiService';
+import { generateStoryAndImages, ApiError } from './services/geminiService';
 import type { Story, Language, IllustrationStyle } from './types';
 import { LogoIcon } from './components/icons';
 import { translations } from './i18n';
@@ -51,7 +51,13 @@ const App: React.FC = () => {
       });
     } catch (err) {
       console.error(err);
-      setError(err instanceof Error ? err.message : 'An unknown error occurred.');
+      if (err instanceof ApiError) {
+        setError(t.errors[err.userFriendlyMessageKey]);
+      } else if (err instanceof Error) {
+        setError(err.message);
+      } else {
+        setError(t.errors.unknown);
+      }
     } finally {
       setIsLoading(false);
       setLoadingMessage('');
