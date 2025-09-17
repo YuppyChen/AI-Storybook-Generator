@@ -34,6 +34,24 @@ const storySchema = {
   required: ["title", "pages"],
 };
 
+export const generateRandomInspiration = async (apiKey: string, language: Language): Promise<string> => {
+    try {
+        const ai = new GoogleGenAI({ apiKey });
+        const langInstruction = language === 'zh' ? 'Chinese' : 'English';
+        const response = await ai.models.generateContent({
+            model: "gemini-2.5-flash",
+            contents: `Generate a single, short, whimsical children's story idea. The idea should be a single sentence. Output it in ${langInstruction}. Just the idea, nothing else.`,
+            config: {
+                temperature: 1.2,
+            },
+        });
+        return response.text.trim().replace(/"/g, ''); // Remove quotes from response
+    } catch (error) {
+        console.error("Error generating inspiration:", error);
+        throw new Error("Failed to generate a story idea. The model might be busy, please try again.");
+    }
+};
+
 const generateCharacterProfile = async (apiKey: string, prompt: string, language: Language): Promise<string> => {
     try {
         const ai = new GoogleGenAI({ apiKey });

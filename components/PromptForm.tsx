@@ -1,17 +1,21 @@
 import React, { useState } from 'react';
-import { MagicWandIcon } from './icons';
+import { MagicWandIcon, LightbulbIcon } from './icons';
 import { translations } from '../i18n';
 import type { Language, IllustrationStyle } from '../types';
+import { generateRandomInspiration } from '../services/geminiService';
+
 
 interface PromptFormProps {
   onGenerate: (prompt: string, style: IllustrationStyle) => void;
   isLoading: boolean;
   language: Language;
+  apiKey: string | null;
 }
 
-export const PromptForm: React.FC<PromptFormProps> = ({ onGenerate, isLoading, language }) => {
+export const PromptForm: React.FC<PromptFormProps> = ({ onGenerate, isLoading, language, apiKey }) => {
   const [prompt, setPrompt] = useState<string>('');
   const [style, setStyle] = useState<IllustrationStyle>('storybook');
+  const [isGeneratingInspiration, setIsGeneratingInspiration] = useState(false);
   const t = translations[language];
   const examplePrompts = t.examplePrompts;
   const illustrationStyles: IllustrationStyle[] = ['storybook', 'watercolor', 'cartoon', 'photorealistic', 'anime'];
@@ -28,6 +32,20 @@ export const PromptForm: React.FC<PromptFormProps> = ({ onGenerate, isLoading, l
     setPrompt(example);
   };
 
+  const handleGenerateInspiration = async () => {
+    if (!apiKey) return;
+    setIsGeneratingInspiration(true);
+    try {
+        const inspiration = await generateRandomInspiration(apiKey, language);
+        setPrompt(inspiration);
+    } catch (error) {
+        console.error("Failed to generate inspiration:", error);
+        alert(error instanceof Error ? error.message : "Could not generate inspiration.");
+    } finally {
+        setIsGeneratingInspiration(false);
+    }
+  };
+
   return (
     <div className="max-w-2xl mx-auto p-6 bg-white rounded-2xl shadow-lg border border-gray-100">
       <form onSubmit={handleSubmit}>
@@ -35,13 +53,25 @@ export const PromptForm: React.FC<PromptFormProps> = ({ onGenerate, isLoading, l
           <label htmlFor="prompt" className="block text-lg font-semibold text-gray-700 mb-2">
             {t.promptLabel}
           </label>
-          <textarea
-            id="prompt"
-            value={prompt}
-            onChange={(e) => setPrompt(e.target.value)}
-            placeholder={t.promptPlaceholder}
-            className="w-full h-32 p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-amber-400 focus:border-amber-400 transition-shadow duration-200 resize-none disabled:bg-gray-50"
-          />
+          <div className="relative">
+            <textarea
+              id="prompt"
+              value={prompt}
+              onChange={(e) => setPrompt(e.target.value)}
+              placeholder={t.promptPlaceholder}
+              className="w-full h-32 p-3 pr-12 border border-gray-300 rounded-lg focus:ring-2 focus:ring-amber-400 focus:border-amber-400 transition-shadow duration-200 resize-none disabled:bg-gray-50"
+            />
+            <button
+                type="button"
+                onClick={handleGenerateInspiration}
+                disabled={isLoading || isGeneratingInspiration}
+                className="absolute bottom-2 right-2 p-2 text-amber-500 rounded-full hover:bg-amber-100 transition-colors disabled:text-gray-400 disabled:cursor-not-allowed"
+                aria-label={t.generateInspiration}
+                title={t.generateInspiration}
+            >
+                <LightbulbIcon className={`h-6 w-6 ${isGeneratingInspiration ? 'animate-spin' : ''}`} />
+            </button>
+          </div>
           <div className="mt-4">
             <p className="text-sm text-gray-500 mb-2">{t.inspiration}</p>
             <div className="flex flex-wrap gap-2">

@@ -112,7 +112,12 @@ const App: React.FC = () => {
                 <p>{t.apiKeyWarningText}</p>
               </div>
             )}
-            <PromptForm onGenerate={handleGenerateStory} isLoading={isLoading || !apiKey} language={language} />
+            <PromptForm 
+              onGenerate={handleGenerateStory} 
+              isLoading={isLoading || !apiKey} 
+              language={language}
+              apiKey={apiKey}
+            />
           </>
         )}
 

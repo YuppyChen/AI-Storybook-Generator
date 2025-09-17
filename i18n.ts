@@ -5,6 +5,7 @@ export const translations = {
     promptLabel: "What is your story about?",
     promptPlaceholder: "e.g., A little fox who wants to become a pilot",
     inspiration: "Need inspiration? Try one of these:",
+    generateInspiration: "Generate a random idea",
     illustrationStyleLabel: "Choose an illustration style:",
     styles: {
       storybook: "Storybook",
@@ -47,6 +48,7 @@ export const translations = {
     promptLabel: "您的故事是关于什么的？",
     promptPlaceholder: "例如：一只想成为飞行员的小狐狸",
     inspiration: "需要灵感吗？试试这些：",
+    generateInspiration: "随机生成一个灵感",
     illustrationStyleLabel: "选择插画风格：",
     styles: {
       storybook: "绘本风",
