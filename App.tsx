@@ -1,46 +1,28 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState } from 'react';
 import { PromptForm } from './components/PromptForm';
 import { StorybookViewer } from './components/StorybookViewer';
 import { Loader } from './components/Loader';
 import { generateStoryAndImages } from './services/geminiService';
-import type { Story, Language } from './types';
+import type { Story, Language, IllustrationStyle } from './types';
 import { LogoIcon } from './components/icons';
 import { translations } from './i18n';
-import { ApiKeyManager } from './components/ApiKeyManager';
 
 const App: React.FC = () => {
   const [story, setStory] = useState<Story | null>(null);
   const [isLoading, setIsLoading] = useState<boolean>(false);
   const [loadingMessage, setLoadingMessage] = useState<string>('');
   const [error, setError] = useState<string | null>(null);
-  const [language, setLanguage] = useState<Language>('en');
-  const [apiKey, setApiKey] = useState<string | null>(null);
-
-  useEffect(() => {
-    const storedApiKey = localStorage.getItem('gemini-api-key');
-    if (storedApiKey) {
-      setApiKey(storedApiKey);
-    }
-  }, []);
+  const [language, setLanguage] = useState<Language>('zh');
 
   const t = translations[language];
 
-  const handleApiKeyChange = (newKey: string) => {
-    setApiKey(newKey);
-    localStorage.setItem('gemini-api-key', newKey);
-  };
-
-  const handleGenerateStory = async (prompt: string) => {
-    if (!apiKey) {
-      setError(t.apiKeyRequiredError);
-      return;
-    }
+  const handleGenerateStory = async (prompt: string, style: IllustrationStyle) => {
     setIsLoading(true);
     setError(null);
     setStory(null);
 
     try {
-      await generateStoryAndImages(prompt, language, apiKey, (messageKey, current, total) => {
+      await generateStoryAndImages(prompt, style, language, (messageKey, current, total) => {
         if (messageKey === 'painting') {
             setLoadingMessage(t.loadingPainting(current!, total!));
         } else {
@@ -66,8 +48,7 @@ const App: React.FC = () => {
 
   return (
     <div className="min-h-screen bg-amber-50 font-sans text-gray-800 antialiased">
-      <header className="absolute top-0 left-0 right-0 p-4 flex justify-between items-start">
-        <ApiKeyManager initialApiKey={apiKey} onApiKeyChange={handleApiKeyChange} language={language} />
+      <header className="absolute top-0 left-0 right-0 p-4 flex justify-end items-start">
         <div className="flex items-center gap-2 bg-white/50 backdrop-blur-sm rounded-lg p-1">
           <button 
             onClick={() => setLanguage('en')}
@@ -101,7 +82,7 @@ const App: React.FC = () => {
         ) : isLoading ? (
           <Loader message={loadingMessage} />
         ) : (
-          <PromptForm onGenerate={handleGenerateStory} isLoading={isLoading} language={language} isApiKeySet={!!apiKey} />
+          <PromptForm onGenerate={handleGenerateStory} isLoading={isLoading} language={language} />
         )}
 
         {error && (

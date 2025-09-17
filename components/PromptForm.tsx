@@ -1,24 +1,26 @@
 import React, { useState } from 'react';
 import { MagicWandIcon } from './icons';
 import { translations } from '../i18n';
-import type { Language } from '../types';
+import type { Language, IllustrationStyle } from '../types';
 
 interface PromptFormProps {
-  onGenerate: (prompt: string) => void;
+  onGenerate: (prompt: string, style: IllustrationStyle) => void;
   isLoading: boolean;
   language: Language;
-  isApiKeySet: boolean;
 }
 
-export const PromptForm: React.FC<PromptFormProps> = ({ onGenerate, isLoading, language, isApiKeySet }) => {
+export const PromptForm: React.FC<PromptFormProps> = ({ onGenerate, isLoading, language }) => {
   const [prompt, setPrompt] = useState<string>('');
+  const [style, setStyle] = useState<IllustrationStyle>('storybook');
   const t = translations[language];
   const examplePrompts = t.examplePrompts;
+  const illustrationStyles: IllustrationStyle[] = ['storybook', 'watercolor', 'cartoon', 'photorealistic', 'anime'];
+
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
-    if (prompt.trim() && isApiKeySet) {
-      onGenerate(prompt);
+    if (prompt.trim()) {
+      onGenerate(prompt, style);
     }
   };
 
@@ -29,7 +31,7 @@ export const PromptForm: React.FC<PromptFormProps> = ({ onGenerate, isLoading, l
   return (
     <div className="max-w-2xl mx-auto p-6 bg-white rounded-2xl shadow-lg border border-gray-100">
       <form onSubmit={handleSubmit}>
-        <fieldset disabled={isLoading || !isApiKeySet}>
+        <fieldset disabled={isLoading}>
           <label htmlFor="prompt" className="block text-lg font-semibold text-gray-700 mb-2">
             {t.promptLabel}
           </label>
@@ -55,14 +57,32 @@ export const PromptForm: React.FC<PromptFormProps> = ({ onGenerate, isLoading, l
               ))}
             </div>
           </div>
-           {!isApiKeySet && (
-            <div className="mt-4 text-center text-sm text-red-600 bg-red-50 p-3 rounded-lg">
-                {t.apiKeyWarning}
+          
+          <div className="mt-6">
+            <label className="block text-lg font-semibold text-gray-700 mb-3">
+              {t.illustrationStyleLabel}
+            </label>
+            <div className="flex flex-wrap gap-3">
+              {illustrationStyles.map((s) => (
+                <button
+                  key={s}
+                  type="button"
+                  onClick={() => setStyle(s)}
+                  className={`px-4 py-2 rounded-lg text-sm font-semibold transition-all duration-200 border-2 ${
+                    style === s
+                      ? 'bg-amber-500 text-white border-amber-500 shadow-md'
+                      : 'bg-white text-gray-700 border-gray-200 hover:border-amber-400 hover:text-amber-600'
+                  }`}
+                >
+                  {t.styles[s as keyof typeof t.styles]}
+                </button>
+              ))}
             </div>
-           )}
+          </div>
+
           <button
             type="submit"
-            disabled={isLoading || !prompt.trim() || !isApiKeySet}
+            disabled={isLoading || !prompt.trim()}
             className="mt-6 w-full flex items-center justify-center gap-2 bg-amber-500 text-white font-bold py-3 px-4 rounded-lg hover:bg-amber-600 transition-all duration-300 transform hover:scale-105 disabled:bg-gray-300 disabled:cursor-not-allowed disabled:transform-none shadow-md"
           >
             <MagicWandIcon className="h-5 w-5" />
