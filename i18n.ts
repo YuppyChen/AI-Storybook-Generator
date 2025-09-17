@@ -31,6 +31,9 @@ export const translations = {
     apiKey: "API Key",
     apiKeyPlaceholder: "Enter your Google Gemini API Key",
     apiKeySave: "Save Key",
+    apiKeyWarningTitle: "API Key Required",
+    apiKeyWarningText: "Please use the key icon in the header to enter your Google Gemini API key. This is required to generate stories.",
+    apiKeyMissingError: "API Key not set. Please add your key to continue.",
     examplePrompts: [
         "A brave little squirrel who is afraid of heights.",
         "A friendly robot who discovers a magical garden.",
@@ -70,6 +73,9 @@ export const translations = {
     apiKey: "API 密钥",
     apiKeyPlaceholder: "输入您的 Google Gemini API 密钥",
     apiKeySave: "保存密钥",
+    apiKeyWarningTitle: "需要 API 密钥",
+    apiKeyWarningText: "请使用标题栏中的钥匙图标输入您的 Google Gemini API 密钥。这是生成故事所必需的。",
+    apiKeyMissingError: "未设置 API 密钥。请添加您的密钥以继续。",
     examplePrompts: [
         "一只害怕高处却很勇敢的小松鼠。",
         "一个发现魔法花园的友好机器人。",

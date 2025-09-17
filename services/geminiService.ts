@@ -34,9 +34,9 @@ const storySchema = {
   required: ["title", "pages"],
 };
 
-const generateCharacterProfile = async (prompt: string, language: Language): Promise<string> => {
+const generateCharacterProfile = async (apiKey: string, prompt: string, language: Language): Promise<string> => {
     try {
-        const ai = new GoogleGenAI({ apiKey: process.env.API_KEY });
+        const ai = new GoogleGenAI({ apiKey });
         const langInstruction = language === 'zh' ? 'Chinese' : 'English';
         const response = await ai.models.generateContent({
             model: "gemini-2.5-flash",
@@ -53,18 +53,21 @@ const generateCharacterProfile = async (prompt: string, language: Language): Pro
     }
 };
 
-const generateStoryContent = async (prompt: string, language: Language): Promise<Story> => {
+const generateStoryContent = async (apiKey: string, prompt: string, language: Language): Promise<Story> => {
     try {
-        const ai = new GoogleGenAI({ apiKey: process.env.API_KEY });
-        const langInstruction = language === 'zh' ? 'in Chinese' : 'in English';
+        const ai = new GoogleGenAI({ apiKey });
+        const langInstruction = language === 'zh' ? 'Chinese' : 'English';
+
+        const systemInstruction = `You are a world-class children's book author, specializing in captivating stories for children aged 3-7. Your mission is to create a complete 5-page story. Each story must have a clear beginning, a simple conflict or challenge in the middle, and a heartwarming resolution at the end. Ensure every story imparts a gentle, positive message, like friendship, bravery, or curiosity. The story's title and main text should be in ${langInstruction}. Crucially, the 'illustrationPrompt' for each page must be a vivid, action-oriented description in English, focusing ONLY on the setting and the character's actions. DO NOT describe the character's physical features in the illustration prompt, as that is handled separately.`;
+        const contents = `Write a 5-page children's story in ${langInstruction} based on this idea: "${prompt}". The story should be whimsical, gentle, and follow a classic narrative arc. The tone should be appropriate for a 3-7 year old. Remember all the rules from the system instruction.`;
 
         const response = await ai.models.generateContent({
             model: "gemini-2.5-flash",
-            contents: `Create a children's story ${langInstruction} based on this prompt: "${prompt}". The story text and title should be ${langInstruction}, but the 'illustrationPrompt' for each page must be in English. The illustration prompt should ONLY describe the scene and action, not the character's appearance.`,
+            contents: contents,
             config: {
                 responseMimeType: "application/json",
                 responseSchema: storySchema,
-                systemInstruction: `You are a creative author who writes delightful and short (5 pages) storybooks for children aged 4-8. Your stories are imaginative, have a positive message, and are easy to understand. You will write the story and title ${langInstruction}, but you will always write the illustration prompts in English.`,
+                systemInstruction: systemInstruction,
             },
         });
 
@@ -83,19 +86,23 @@ const generateStoryContent = async (prompt: string, language: Language): Promise
     }
 };
 
-const generateImageForPage = async (page: StoryPage, style: IllustrationStyle, characterProfile: string): Promise<string> => {
+const generateImageForPage = async (apiKey: string, page: StoryPage, style: IllustrationStyle, characterProfile: string): Promise<string> => {
     try {
-        const ai = new GoogleGenAI({ apiKey: process.env.API_KEY });
+        const ai = new GoogleGenAI({ apiKey });
         
         const styleDescription: Record<IllustrationStyle, string> = {
-            storybook: "Children's storybook illustration style.",
-            watercolor: "In the style of a vibrant watercolor painting for a children's book.",
-            cartoon: "In a playful and colorful cartoon style for a children's book.",
-            photorealistic: "In a photorealistic style, highly detailed.",
-            anime: "In a beautiful and expressive anime style.",
+            storybook: "Charming children's storybook illustration, simple and heartwarming, with soft colors and clean lines. Centered character.",
+            watercolor: "Vibrant and gentle watercolor painting, with beautiful color bleeds and a dreamy, whimsical feel, perfect for a children's book.",
+            cartoon: "Playful and bold cartoon style, with thick outlines, expressive characters, and bright, cheerful colors. Dynamic and fun.",
+            photorealistic: "Cinematic, photorealistic style, epic lighting, highly detailed, visually stunning. 8k.",
+            anime: "Lush and expressive anime style, cinematic lighting, vibrant colors, beautiful details, reminiscent of a Studio Ghibli film.",
         };
         
-        const fullPrompt = `${styleDescription[style]} An illustration of ${characterProfile}, in a scene where they are ${page.illustrationPrompt}`;
+        const fullPrompt = `
+Style: ${styleDescription[style]}
+Subject: ${characterProfile}.
+Scene: The character is ${page.illustrationPrompt}.
+Negative prompt: Do not include any text, words, letters, signatures, or watermarks. The image should be clean.`;
         
         const response = await ai.models.generateContent({
             model: 'gemini-2.5-flash-image-preview',
@@ -127,6 +134,7 @@ const generateImageForPage = async (page: StoryPage, style: IllustrationStyle, c
 };
 
 export const generateStoryAndImages = async (
+  apiKey: string,
   prompt: string, 
   style: IllustrationStyle,
   language: Language,
@@ -134,10 +142,10 @@ export const generateStoryAndImages = async (
   onCompletePage: (storyUpdate: Story | ((prevStory: Story | null) => Story | null)) => void
 ): Promise<void> => {
     onProgress("loadingCharacter");
-    const characterProfile = await generateCharacterProfile(prompt, language);
+    const characterProfile = await generateCharacterProfile(apiKey, prompt, language);
 
     onProgress("loadingCrafting");
-    const storyStructure = await generateStoryContent(prompt, language);
+    const storyStructure = await generateStoryContent(apiKey, prompt, language);
     
     onCompletePage(storyStructure); // Display text first
 
@@ -146,7 +154,7 @@ export const generateStoryAndImages = async (
     const imagePromises = storyStructure.pages.map((page, index) => 
         (async () => {
             onProgress("painting", index + 1, totalPages);
-            const imageUrl = await generateImageForPage(page, style, characterProfile);
+            const imageUrl = await generateImageForPage(apiKey, page, style, characterProfile);
             
             onCompletePage(prevStory => {
                 if (!prevStory) return null;

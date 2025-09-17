@@ -37,6 +37,7 @@ export const ApiKeyManager: React.FC<ApiKeyManagerProps> = ({ initialApiKey, onA
         onClick={() => setIsEditing(!isEditing)}
         className={`flex items-center gap-2 p-2 rounded-lg transition-colors text-sm font-semibold
           ${isKeySet ? 'bg-green-100 text-green-800 hover:bg-green-200' : 'bg-red-100 text-red-800 hover:bg-red-200'}`}
+        aria-label="Manage API Key"
       >
         <KeyIcon className="h-5 w-5" />
         <span className="hidden md:inline">{t.apiKey}</span>
