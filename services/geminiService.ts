@@ -1,12 +1,6 @@
 import { GoogleGenAI, Type } from "@google/genai";
 import type { Story, StoryPage, Language } from '../types';
 
-if (!process.env.API_KEY) {
-    throw new Error("API_KEY environment variable is not set.");
-}
-
-const ai = new GoogleGenAI({ apiKey: process.env.API_KEY });
-
 const storySchema = {
   type: Type.OBJECT,
   properties: {
@@ -41,8 +35,9 @@ const storySchema = {
 };
 
 
-const generateStoryContent = async (prompt: string, language: Language): Promise<Story> => {
+const generateStoryContent = async (prompt: string, language: Language, apiKey: string): Promise<Story> => {
     try {
+        const ai = new GoogleGenAI({ apiKey });
         const langInstruction = language === 'zh' ? 'in Chinese' : 'in English';
 
         const response = await ai.models.generateContent({
@@ -70,8 +65,9 @@ const generateStoryContent = async (prompt: string, language: Language): Promise
     }
 };
 
-const generateImageForPage = async (page: StoryPage): Promise<string> => {
+const generateImageForPage = async (page: StoryPage, apiKey: string): Promise<string> => {
     try {
+        const ai = new GoogleGenAI({ apiKey });
         const response = await ai.models.generateImages({
             model: 'imagen-4.0-generate-001',
             prompt: `Children's storybook illustration style. ${page.illustrationPrompt}`,
@@ -94,17 +90,15 @@ const generateImageForPage = async (page: StoryPage): Promise<string> => {
     }
 };
 
-// FIX: Updated the type of onCompletePage to accept a state updater function,
-// which is compatible with React's useState setter. This resolves the type error
-// and allows for safe, atomic state updates as images are generated.
 export const generateStoryAndImages = async (
   prompt: string, 
   language: Language,
+  apiKey: string,
   onProgress: (messageKey: string, current?: number, total?: number) => void,
   onCompletePage: (storyUpdate: Story | ((prevStory: Story | null) => Story | null)) => void
 ): Promise<void> => {
     onProgress("loadingCrafting");
-    const storyStructure = await generateStoryContent(prompt, language);
+    const storyStructure = await generateStoryContent(prompt, language, apiKey);
     
     onCompletePage(storyStructure); // Display text first
 
@@ -113,17 +107,10 @@ export const generateStoryAndImages = async (
     const imagePromises = storyStructure.pages.map((page, index) => 
         (async () => {
             onProgress("painting", index + 1, totalPages);
-            const imageUrl = await generateImageForPage(page);
+            const imageUrl = await generateImageForPage(page, apiKey);
             
-            // Use an updater function for onCompletePage. This is crucial for avoiding race conditions
-            // when updating the story state as images are generated concurrently. It ensures
-            // each update is applied to the most recent state.
             onCompletePage(prevStory => {
-                // The updater function's parameter can be null based on the state's type.
-                // Although the story structure is set before this, we check for null
-                // to ensure type safety.
                 if (!prevStory) return null;
-
                 const updatedPages = prevStory.pages.map(p => 
                     p.pageNumber === page.pageNumber ? { ...p, imageUrl } : p
                 );
