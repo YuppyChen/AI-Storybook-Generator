@@ -1,30 +1,32 @@
 import React, { useState } from 'react';
 import { MagicWandIcon, LightbulbIcon } from './icons';
 import { translations } from '../i18n';
-import type { Language, IllustrationStyle } from '../types';
+import type { Language, IllustrationStyle, ImageModel } from '../types';
 import { generateRandomInspiration, ApiError } from '../services/geminiService';
 
 
 interface PromptFormProps {
-  onGenerate: (prompt: string, style: IllustrationStyle) => void;
+  onGenerate: (prompt: string, style: IllustrationStyle, numberOfPages: number, imageModel: ImageModel) => void;
   isLoading: boolean;
   language: Language;
-  apiKey: string | null;
 }
 
-export const PromptForm: React.FC<PromptFormProps> = ({ onGenerate, isLoading, language, apiKey }) => {
+export const PromptForm: React.FC<PromptFormProps> = ({ onGenerate, isLoading, language }) => {
   const [prompt, setPrompt] = useState<string>('');
   const [style, setStyle] = useState<IllustrationStyle>('storybook');
+  const [imageModel, setImageModel] = useState<ImageModel>('imagen-4.0-generate-001');
+  const [numberOfPages, setNumberOfPages] = useState<string>('5');
   const [isGeneratingInspiration, setIsGeneratingInspiration] = useState(false);
   const t = translations[language];
   const examplePrompts = t.examplePrompts;
   const illustrationStyles: IllustrationStyle[] = ['storybook', 'watercolor', 'cartoon', 'photorealistic', 'anime'];
-
+  const imageModels: ImageModel[] = ['imagen-4.0-generate-001', 'gemini-2.5-flash-image-preview'];
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
-    if (prompt.trim()) {
-      onGenerate(prompt, style);
+    const numPages = parseInt(numberOfPages, 10);
+    if (prompt.trim() && !isNaN(numPages) && numPages >= 1 && numPages <= 20) {
+      onGenerate(prompt, style, numPages, imageModel);
     }
   };
 
@@ -33,10 +35,9 @@ export const PromptForm: React.FC<PromptFormProps> = ({ onGenerate, isLoading, l
   };
 
   const handleGenerateInspiration = async () => {
-    if (!apiKey) return;
     setIsGeneratingInspiration(true);
     try {
-        const inspiration = await generateRandomInspiration(apiKey, language);
+        const inspiration = await generateRandomInspiration(language);
         setPrompt(inspiration);
     } catch (error) {
         console.error("Failed to generate inspiration:", error);
@@ -49,6 +50,9 @@ export const PromptForm: React.FC<PromptFormProps> = ({ onGenerate, isLoading, l
         setIsGeneratingInspiration(false);
     }
   };
+
+  const numPagesInt = parseInt(numberOfPages, 10);
+  const isPagesInvalid = isNaN(numPagesInt) || numPagesInt < 1 || numPagesInt > 20;
 
   return (
     <div className="max-w-2xl mx-auto p-6 bg-white rounded-2xl shadow-lg border border-gray-100">
@@ -114,10 +118,56 @@ export const PromptForm: React.FC<PromptFormProps> = ({ onGenerate, isLoading, l
             </div>
           </div>
 
+          <div className="mt-6">
+            <label className="block text-lg font-semibold text-gray-700 mb-3">
+              {t.imageModelLabel}
+            </label>
+            <div className="flex flex-wrap gap-3">
+              {imageModels.map((m) => (
+                <button
+                  key={m}
+                  type="button"
+                  onClick={() => setImageModel(m)}
+                  className={`px-4 py-2 rounded-lg text-sm font-semibold transition-all duration-200 border-2 ${
+                    imageModel === m
+                      ? 'bg-amber-500 text-white border-amber-500 shadow-md'
+                      : 'bg-white text-gray-700 border-gray-200 hover:border-amber-400 hover:text-amber-600'
+                  }`}
+                >
+                  {t.models[m as keyof typeof t.models]}
+                </button>
+              ))}
+            </div>
+          </div>
+
+          <div className="mt-6">
+            <label htmlFor="numberOfPages" className="block text-lg font-semibold text-gray-700 mb-3">
+              {t.numberOfPagesLabel}
+            </label>
+            <input
+              id="numberOfPages"
+              type="number"
+              value={numberOfPages}
+              onChange={(e) => setNumberOfPages(e.target.value)}
+              onBlur={(e) => {
+                  const num = parseInt(e.target.value, 10);
+                  if (isNaN(num) || num < 1) {
+                      setNumberOfPages('1');
+                  } else if (num > 20) {
+                      setNumberOfPages('20');
+                  }
+              }}
+              min="1"
+              max="20"
+              className="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-amber-400 focus:border-amber-400 transition-shadow duration-200 disabled:bg-gray-50"
+            />
+            <p className="text-sm text-gray-500 mt-1">{t.pageCountHint}</p>
+          </div>
+
           <button
             type="submit"
-            disabled={isLoading || !prompt.trim()}
-            className="mt-6 w-full flex items-center justify-center gap-2 bg-amber-500 text-white font-bold py-3 px-4 rounded-lg hover:bg-amber-600 transition-all duration-300 transform hover:scale-105 disabled:bg-gray-300 disabled:cursor-not-allowed disabled:transform-none shadow-md"
+            disabled={isLoading || !prompt.trim() || isPagesInvalid}
+            className="mt-8 w-full flex items-center justify-center gap-2 bg-amber-500 text-white font-bold py-3 px-4 rounded-lg hover:bg-amber-600 transition-all duration-300 transform hover:scale-105 disabled:bg-gray-300 disabled:cursor-not-allowed disabled:transform-none shadow-md"
           >
             <MagicWandIcon className="h-5 w-5" />
             {isLoading ? t.creatingButton : t.generateButton}

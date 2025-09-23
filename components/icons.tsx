@@ -58,13 +58,6 @@ export const ArchiveIcon: React.FC<React.SVGProps<SVGSVGElement>> = (props) => (
   </svg>
 );
 
-export const KeyIcon: React.FC<React.SVGProps<SVGSVGElement>> = (props) => (
-    <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" {...props}>
-      <path d="M21 2l-2 2m-7.61 7.61a5.5 5.5 0 1 1-7.778 7.778 5.5 5.5 0 0 1 7.777-7.777z" />
-      <path d="M15.5 7.5l3 3L22 7l-3-3" />
-    </svg>
-  );
-
 export const LogoIcon: React.FC<React.SVGProps<SVGSVGElement>> = (props) => (
     <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" {...props}>
         <path d="M2 3.993A1 1 0 0 1 2.992 3h18.016c.548 0 .992.445.992.993V20.007A.993.993 0 0 1 21.008 21H2.992A.993.993 0 0 1 2 20.007V3.993ZM12 5H4v14h8V5Zm2 14h6V5h-6v14Z"/>
@@ -76,5 +69,22 @@ export const LightbulbIcon: React.FC<React.SVGProps<SVGSVGElement>> = (props) =>
         <path d="M15 14c.2-1 .7-1.7 1.5-2.5 1-.9 1.5-2.2 1.5-3.5A6 6 0 0 0 6 8c0 1 .2 2.2 1.5 3.5.7.7 1.3 1.5 1.5 2.5"/>
         <path d="M9 18h6"/>
         <path d="M10 22h4"/>
+    </svg>
+);
+
+export const LayoutIcon: React.FC<React.SVGProps<SVGSVGElement>> = (props) => (
+  <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" {...props}>
+    <rect width="18" height="18" x="3" y="3" rx="2" ry="2" />
+    <line x1="3" y1="9" x2="21" y2="9" />
+    <path d="M3 15h18" />
+  </svg>
+);
+
+export const VideoIcon: React.FC<React.SVGProps<SVGSVGElement>> = (props) => (
+    <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" {...props}>
+        <path d="M16 13l-4 4-4-4" />
+        <path d="M12 17V3" />
+        <path d="M22 19a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2" />
+        <path d="M2 12v-3a2 2 0 0 1 2-2h16a2 2 0 0 1 2 2v3" />
     </svg>
 );
